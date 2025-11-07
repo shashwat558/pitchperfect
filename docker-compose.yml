@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+    postgres:
+       image: postgres:17
+       container_name: pithcPerfect
+       environment: 
+           POSTGRES_USER: postgres
+           POSTGRES_PASSWORD: password
+           POSTGRES_DB: pp_db
+       ports:
+         - 5432:5432
+       volumes:
+         - pgdata:/var/lib/postgresql/data
+
+volumes:
+   pgdata:
