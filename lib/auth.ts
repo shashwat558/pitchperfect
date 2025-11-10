@@ -15,8 +15,8 @@ export const auth = betterAuth({
         google: {
            prompt: "select_account consent",
            accessType: "offline",
-           clientId: "",
-           clientSecret: ""
+           clientId: process.env.GOOGLE_CLIENT_ID!,
+           clientSecret: process.env.GOOGLE_CLIENT_SECRET!
         }
     },
     session: {
