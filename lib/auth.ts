@@ -13,6 +13,8 @@ export const auth = betterAuth({
     },
     socialProviders: {
         google: {
+           prompt: "select_account consent",
+           accessType: "offline",
            clientId: "",
            clientSecret: ""
         }
