@@ -16,7 +16,7 @@ const SoftButton = ({ children, icon: Icon, className = "" }) => (
                 w-full rounded-xl py-2.5
                 flex items-center justify-center gap-3
                 text-gray-700 font-medium text-base
-                bg-gradient-to-b from-white to-gray-100
+                bg-liner-to-b from-white to-gray-100
                 border border-gray-200
                 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.05)]
                 hover:bg-gray-50
@@ -25,7 +25,7 @@ const SoftButton = ({ children, icon: Icon, className = "" }) => (
                 
                 // --- Dark Mode Styles ---
                 dark:text-gray-200
-                dark:bg-gradient-to-b dark:from-gray-800 dark:to-gray-900
+                dark:bg-linear-to-b dark:from-gray-800 dark:to-gray-900
                 dark:border-gray-700
                 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_4px_rgba(0,0,0,0.3)]
                 dark:hover:bg-gray-700
