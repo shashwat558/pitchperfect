@@ -83,8 +83,48 @@ model Verification {
 model Pitch {
   id            String  @id @default(uuid())
   title         String
-  userId        String 
+  userId        String
+  pitchTypeId   String
+  pitchResult   PitchResult?
+  pitch_frames  PitchFrames[]
   createdAt     DateTime @default(now())
   user          User  @relation(fields: [userId], references: [id])
+  pitch_type    PitchType @relation(fields: [pitchTypeId], references: [id])
+}
+
+model PitchResult {
+  id         String @id @default(uuid())
+  pitchId    String @unique
+  pitch      Pitch @relation(fields: [pitchId], references: [id])
+  tips       String[]
+  score      String
+}
+
+model PitchFrames {
+  id                  String @id @default(uuid())
+  pitchId             String
+  filler_count        Int
+  timestamp           Float
+  eye_contact         Float
+  transcript_segment  String
+  wpm                 Int
+  smilePercentage     Int
+  confidence_score    Int
+  ai_tip              String
+  createdAtt          DateTime @default(now())
+  pitch               Pitch @relation(fields: [pitchId], references: [id])
+}
+
+
+model PitchType {
+  id                String @id @default(uuid())
+  slug              String
+  name              String
+  duration          Int
+  system_prompt     String
+  template_script   String?
+  createdAt         DateTime @default(now())
+
+  pitches           Pitch[]
 }
 
