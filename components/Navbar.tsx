@@ -5,6 +5,9 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 import {motion} from "motion/react";
 
+import { BorderBeam } from './ui/BorderBeam';
+import ThemeToggle from './theme-toggler';
+
 const font = Inconsolata({
     weight: "400",
     subsets: ['latin']
@@ -49,10 +52,10 @@ const Navbar = ({className}: {className:string}) => {
                 <h1 className='text-lg font-semibold'>PitchPerfect</h1>
 
             </div>
-            <div className='relative flex justify-center space-x-12 items-center'>
+            <div className='relative flex justify-center space-x-12 items-center dark:text-[#f0ffe8]'>
                 <h1>Features</h1>
                 <div
-                    className="relative dark:text-[#bcd1af] text-white"
+                    className="relative"
                     
                     onMouseLeave={() => setIsHovered(false)}
                     >
@@ -62,7 +65,7 @@ const Navbar = ({className}: {className:string}) => {
                         variants={mainContainer}
                         initial="hidden"
                         animate={isHovered ? "show" : "hidden"}
-                        className={`absolute top-5 -left-10 rounded-none  p-2 min-w-[250px]`}
+                        className={`absolute top-5 -left-10 rounded-none  p-2 min-w-[450px]`}
                     >
                        <motion.ul
                         variants={container}
@@ -79,12 +82,23 @@ const Navbar = ({className}: {className:string}) => {
                             <motion.li
                             key={plan.name}
                             variants={item}
-                            className={`group  flex flex-col justify-center rounded-xl border border-white/5 bg-white/5 px-4 py-3 hover:border-white/20 hover:bg-white/10 transition-all duration-200 cursor-pointer`}
+                            className={`group relative flex flex-col justify-center rounded-md border border-white/5 bg-white/5 px-4 py-3 hover:border-white/20 hover:bg-white/10 transition-all duration-200 cursor-pointer`}
                             >
+                         
                             <h3 className="text-white text-sm font-medium group-hover:text-white">
                                 {plan.name}
                             </h3>
                             <p className="text-gray-400 text-xs">{plan.desc}</p>
+                            {plan.name === "Pro" && (
+                                <BorderBeam
+                                size={40}
+                                duration={20}
+                                colorFrom="#92ff6c"
+                                colorTo="#a0ffea"
+                                borderWidth={1.5}
+                                className="rounded-md"
+                                />
+                            )}
                             </motion.li>
                         ))}
                         </motion.ul>
@@ -96,7 +110,8 @@ const Navbar = ({className}: {className:string}) => {
                 <h1>Examples</h1>
 
                 <div className='flex items-center gap-2'>
-                    <button className='px-2 font-semibold bg-black text-white rounded-sm' >Sign In</button>
+                    <button className='px-2 font-semibold dark:bg-[#183b05] rounded-sm' >Sign In</button>
+                    <ThemeToggle />
                 </div>
             </div>
         </div>
