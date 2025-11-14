@@ -110,7 +110,7 @@ export function AppSidebar({ className }: { className: string }) {
         </button>
       </div>
 
-      <nav className="flex-1 py-4 overflow-y-auto overflow-x-hidden">
+      <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeItem === item.id;
