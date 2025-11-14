@@ -6,8 +6,10 @@ export default function BlogLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <section>
-     <AppSidebar />
+  return (
+    <section className="relative">
+     <AppSidebar className="absolute z-10 top-0 left-0" />
     {children}
     </section>
+    )
 }

@@ -1,98 +1,152 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Home, Plus, X, LayoutTemplate, Calendar, FileText, Share2, Clock, Settings } from "lucide-react"
-import { Inconsolata } from "next/font/google"
+import { useState } from "react";
+import {
+  Home,
+  Plus,
+  SettingsIcon,
+  BrainIcon,
+  Camera,
+  HistoryIcon,
+  Square,
+  X
+} from "lucide-react";
+import { Inconsolata } from "next/font/google";
+import { motion } from "motion/react";
+import Image from "next/image";
+import ThemeToggle from "./theme-toggler";
 
 const font = Inconsolata({
-    weight: "400",
-    subsets: ['latin']
-})
+  weight: "400",
+  subsets: ["latin"],
+});
 
-export function AppSidebar() {
-  const [activeItem, setActiveItem] = useState("home")
+export function AppSidebar({ className }: { className: string }) {
+  const [activeItem, setActiveItem] = useState("home");
+  const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
     { id: "home", label: "Home", icon: Home },
-    { id: "templates", label: "Templates", icon: LayoutTemplate },
-    { id: "meetings", label: "Meetings", icon: Calendar },
-    { id: "files", label: "Files", icon: FileText },
-    { id: "shared", label: "Shared with me", icon: Share2 },
-    { id: "history", label: "History", icon: Clock },
-    { id: "integrations", label: "Integrations", icon: Settings },
-  ]
+    { id: "Practice", label: "Practice", icon: BrainIcon },
+    { id: "Record", label: "Record", icon: Camera },
+    { id: "History", label: "History", icon: HistoryIcon },
+    { id: "PitchTypes", label: "Templates", icon: Square },
+  ];
 
-  const collections = [
-    { name: "Commercial", color: "bg-red-500" },
-    { name: "Operations", color: "bg-blue-500" },
-    { name: "Product", color: "bg-green-500" },
-  ]
+  const textAnimation = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { duration: 0.22 }
+    },
+    exit: {
+      opacity: 0,
+      x: -6,
+      transition: { duration: 0.28 }
+    }
+  };
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+  const handleOpen = () => {
+    if (isMobile) setIsOpen((prev) => !prev);
+    else setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    if (isMobile) setIsOpen(false);
+    else setIsOpen(false);
+  };
 
   return (
-    <aside className={`${font.className} w-72 bg-white border-r border-border flex flex-col`}>
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-foreground">Christina&apos;s</h2>
-        <button className="text-muted-foreground hover:text-foreground transition-colors">
-          <X size={20} />
-        </button>
+    <motion.aside
+      onMouseEnter={!isMobile ? handleOpen : undefined}
+      onMouseLeave={!isMobile ? handleClose : undefined}
+      animate={{ width: isOpen ? 260 : 70 }}
+      transition={{ type: "spring", duration: 0.15, damping: 18 }}
+      className={`${font.className} ${className} h-full bg-white dark:bg-neutral-900 border-r border-border dark:border-neutral-700 flex flex-col shadow-sm overflow-hidden`}
+    >
+
+      <div
+        className={`flex items-center ${
+          isOpen ? "justify-between" : "justify-center"
+        } gap-3 p-3 border-b border-border dark:border-neutral-700`}
+      >
+        {isOpen ? (
+          <motion.span
+            variants={textAnimation}
+            initial="hidden"
+            animate="show"
+            exit={"exit"}
+            className="text-lg font-semibold whitespace-nowrap text-foreground dark:text-neutral-100"
+          >
+            PitchPerfect
+          </motion.span>
+        ) : (
+          <Image
+            src={"/vercel.svg"}
+            alt="logo"
+            height={20}
+            width={20}
+            className="opacity-90"
+          />
+        )}
+
+        {isMobile && isOpen && (
+          <button onClick={handleClose}>
+            <X className="text-neutral-700 dark:text-neutral-300" />
+          </button>
+        )}
       </div>
-      <div className="p-4 border-b border-border">
-        <button className="w-full flex items-center justify-between px-4 py-2 rounded-lg hover:bg-muted transition-colors text-foreground font-medium">
-          <span>New chat</span>
-          <Plus size={20} />
+
+      <div className="border-b border-border dark:border-neutral-700">
+        <button
+          className={`w-full flex items-center ${
+            isOpen ? "justify-start" : "justify-center"
+          } gap-3 px-4 py-2 hover:bg-muted dark:hover:bg-neutral-800 transition-colors text-foreground dark:text-neutral-200 font-medium`}
+        >
+          <Plus size={17} className="min-w-5" />
+          {isOpen && <span className="whitespace-nowrap">New chat</span>}
         </button>
       </div>
 
-      
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 py-4 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => {
-          const Icon = item.icon
-          const isActive = activeItem === item.id
+          const Icon = item.icon;
+          const isActive = activeItem === item.id;
+
           return (
-            <button
+            <motion.button
               key={item.id}
+              variants={textAnimation}
+              initial="hidden"
+              animate="show"
+              exit="exit"
               onClick={() => setActiveItem(item.id)}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
-                isActive ? "bg-muted text-foreground" : "text-foreground hover:bg-muted/50"
+              className={`w-full flex items-center ${
+                isOpen ? "" : "justify-center"
+              } gap-3 px-4 py-5 border border-t-0 border-r-0 border-l-0 border-border/40 dark:border-[#394234] rounded-none transition-all overflow-x-hidden ${
+                isActive
+                  ? "bg-muted dark:bg-neutral-800 text-foreground dark:text-white shadow-sm"
+                  : "hover:bg-muted/40 dark:hover:bg-neutral-800 text-foreground dark:text-neutral-300"
               }`}
             >
-              <span className="text-sm font-medium">{item.label}</span>
-              <Icon size={18} className="text-muted-foreground" />
-            </button>
-          )
+              <Icon size={18} className="min-w-5" />
+              {isOpen && (
+                <span className="text-sm whitespace-nowrap">{item.label}</span>
+              )}
+            </motion.button>
+          );
         })}
       </nav>
-
-     
-      <div className="px-4 py-4 border-t border-border space-y-3">
-        <div className="space-y-2">
-          {collections.map((collection) => (
-            <div key={collection.name} className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded ${collection.color}`} />
-              <span className="text-sm text-foreground">{collection.name}</span>
-            </div>
-          ))}
-        </div>
-        <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-          + Add collection
-        </button>
-      </div>
-
-      
-      <div className="px-4 py-4 border-t border-border space-y-4">
-        <button className="flex items-center justify-between w-full px-4 py-2 rounded-lg hover:bg-muted/50 transition-colors">
-          <span className="text-sm text-foreground font-medium">Settings</span>
-          <span className="text-muted-foreground text-lg">⋮</span>
+      <div className="px-2 py-4 border-t border-border dark:border-neutral-700 space-y-4">
+        <button className={`w-full flex ${isOpen ? "justify-start": "justify-center"} items-center gap-3 px-4 py-2 rounded-lg hover:bg-muted/40 dark:hover:bg-neutral-800 transition-colors text-neutral-700 dark:text-neutral-300`}>
+          <SettingsIcon className="min-w-6" />
+          {isOpen && <span className="text-sm font-medium">Settings</span>}
         </button>
 
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-foreground">100 credits left today</p>
-            <p className="text-xs text-muted-foreground">Invite peers to refill</p>
-          </div>
-          
-        </div>
+        <ThemeToggle />
       </div>
-    </aside>
-  )
+    </motion.aside>
+  );
 }

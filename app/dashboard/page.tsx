@@ -1,9 +1,12 @@
-import React from 'react'
+import Image from "next/image";
 
-const page = () => {
+export default function Home() {
   return (
-    <div>page</div>
-  )
-}
+    <div className="flex min-h-screen items-center justify-center dark:bg-[#0a1303] bg-[#f9fafb] font-sans" >
+    
 
-export default page
+      Hi
+      
+    </div>
+  );
+}
