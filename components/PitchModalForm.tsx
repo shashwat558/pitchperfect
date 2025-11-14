@@ -1,17 +1,29 @@
 "use client"
 
 import {motion} from "motion/react"
-import { useEffect,  useRef } from "react";
+import { useEffect,  useRef, useState } from "react";
 import {useMutation, useQuery} from "@tanstack/react-query";
+import { submitPitch } from "@/lib/actions/submitPitch";
+import { toast } from "sonner";
+import { redirect } from "next/navigation";
 
 const getPitchTypes = async () => {
         const res = await fetch("/api/pitch_types");
         return res.json()
     }
+interface PitchPayload {
+            title: string;
+            type: string;
+            description: string;
+        }
 
 
-export default function PitchModalForm({onClose}) {
+export default function PitchModalForm({onClose}: {onClose: () => void}) {
     const modalRef = useRef<HTMLDivElement | null>(null);
+    const [title, setTitle] = useState("");
+    const [type, setType] = useState("");
+    const [description, setDescription] = useState("");
+
     const container = 
     { hidden: { 
         opacity: 0, height: "1px", scale: 0, 
@@ -37,7 +49,31 @@ export default function PitchModalForm({onClose}) {
         const {data, isLoading, error} = useQuery({
             queryKey: ["pitchTypes"],
             queryFn: getPitchTypes
-        })  
+        });
+        const mutation = useMutation({
+            mutationFn: submitPitch,
+            onSuccess: () => {
+                onClose();
+                toast.success("Pitch has been created")
+                
+            },
+            onError: () => {
+                toast.error("Failed to submit")
+            }
+            
+        })
+
+        
+        const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+
+            const payload: PitchPayload = {
+                title,
+                type,
+                description
+            }
+            mutation.mutate(payload)
+        }
         
        
     
@@ -55,6 +91,8 @@ export default function PitchModalForm({onClose}) {
             <input
             type="text"
             placeholder="Enter pitch title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             className="px-4 py-3 rounded-none bg-white/20 dark:bg-white/5 
                 border border-black/10 dark:border-white/10 
                 backdrop-blur-md 
@@ -75,10 +113,13 @@ export default function PitchModalForm({onClose}) {
             focus:ring-2 focus:ring-black/10 dark:focus:ring-white/20
             transition
         "
+        value={type}
+        onChange={(e) => setType(e.target.value)}
         >
         {data.pitchTypes.map((pitchType:{name: string, id: string}) => (
             <option
             key={pitchType.id}
+            value={pitchType.id}
             className="
                 bg-white dark:bg-neutral-900
                 text-black dark:text-white
@@ -98,6 +139,8 @@ export default function PitchModalForm({onClose}) {
             <textarea
             placeholder="Write your pitch description..."
             rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}    
             className="px-4 py-3 rounded-none bg-white/20 dark:bg-white/5
                 border border-black/10 dark:border-white/10 
                 backdrop-blur-md resize-none
@@ -125,12 +168,13 @@ export default function PitchModalForm({onClose}) {
             Cancel
         </button>
         <button
-            className=" py-1 px-2 rounded-none 
-            bg-[#f3fded]
+            className=" py-1 px-2 rounded-none bg-[#f3fded]
             dark:from-white/20 dark:to-white/10 
             text-black dark:text-black"
+
+            onClick={() => handleSubmit}
         >
-            Start
+            {mutation.isPending ? <div className="w-4 h-4 bg-none border border-black animate-spin"></div>:"Start"}
         </button>
         </div>
     </motion.div>
