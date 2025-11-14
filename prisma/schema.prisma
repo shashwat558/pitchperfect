@@ -83,6 +83,8 @@ model Verification {
 model Pitch {
   id            String  @id @default(uuid())
   title         String
+  description   String?
+  goal          String?
   userId        String
   pitchTypeId   String
   pitchResult   PitchResult?
