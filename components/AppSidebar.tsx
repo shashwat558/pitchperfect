@@ -15,6 +15,7 @@ import { Inconsolata } from "next/font/google";
 import { motion } from "motion/react";
 import Image from "next/image";
 import ThemeToggle from "./theme-toggler";
+import { useModalStore } from "@/store/modalStore";
 
 const font = Inconsolata({
   weight: "400",
@@ -24,6 +25,7 @@ const font = Inconsolata({
 export function AppSidebar({ className }: { className: string }) {
   const [activeItem, setActiveItem] = useState("home");
   const [isOpen, setIsOpen] = useState(false);
+  const {openRecordModal} = useModalStore();
 
   const navItems = [
     { id: "home", label: "Home", icon: Home },
@@ -78,7 +80,7 @@ export function AppSidebar({ className }: { className: string }) {
             initial="hidden"
             animate="show"
             exit={"exit"}
-            className="text-lg font-semibold whitespace-nowrap text-foreground dark:text-neutral-100"
+            className="text-[16px] font-semibold whitespace-nowrap text-foreground dark:text-neutral-100"
           >
             PitchPerfect
           </motion.span>
@@ -104,9 +106,10 @@ export function AppSidebar({ className }: { className: string }) {
           className={`w-full flex items-center ${
             isOpen ? "justify-start" : "justify-center"
           } gap-3 px-4 py-2 hover:bg-muted dark:hover:bg-neutral-800 transition-colors text-foreground dark:text-neutral-200 font-medium`}
+           onClick={() => openRecordModal()}
         >
           <Plus size={17} className="min-w-5" />
-          {isOpen && <span className="whitespace-nowrap">New chat</span>}
+          {isOpen && <span className="whitespace-nowrap">New pitch</span>}
         </button>
       </div>
 

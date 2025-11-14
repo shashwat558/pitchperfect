@@ -1,4 +1,5 @@
-import Image from "next/image";
+import PitchModalForm from "@/components/PitchModalForm";
+
 
 export default function Home() {
   return (
