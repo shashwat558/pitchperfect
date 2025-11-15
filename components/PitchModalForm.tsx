@@ -5,7 +5,7 @@ import { useEffect,  useRef, useState } from "react";
 import {useMutation, useQuery} from "@tanstack/react-query";
 import { submitPitch } from "@/lib/actions/submitPitch";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const getPitchTypes = async () => {
         const res = await fetch("/api/pitch_types");
@@ -13,16 +13,18 @@ const getPitchTypes = async () => {
     }
 interface PitchPayload {
             title: string;
-            type: string;
+            pitchTypeId: string;
             description: string;
         }
 
 
 export default function PitchModalForm({onClose}: {onClose: () => void}) {
     const modalRef = useRef<HTMLDivElement | null>(null);
-    const [title, setTitle] = useState("");
-    const [type, setType] = useState("");
+    const [title, setTitle] = useState<string>("");
+    const [type, setType] = useState<string>("");
     const [description, setDescription] = useState("");
+    const typeInitialized = useRef(false);
+    const router = useRouter();
 
     const container = 
     { hidden: { 
@@ -46,15 +48,20 @@ export default function PitchModalForm({onClose}: {onClose: () => void}) {
             };
         }, [onClose]);
 
-        const {data, isLoading, error} = useQuery({
-            queryKey: ["pitchTypes"],
-            queryFn: getPitchTypes
-        });
+        
+
+            const {data} = useQuery({
+                queryKey: ["pitchTypes"],
+                queryFn: getPitchTypes
+            });
+
         const mutation = useMutation({
             mutationFn: submitPitch,
-            onSuccess: () => {
+            onSuccess: (data) => {
                 onClose();
                 toast.success("Pitch has been created")
+                console.log(data)
+                router.push(`/record/${data.id}`)
                 
             },
             onError: () => {
@@ -64,15 +71,18 @@ export default function PitchModalForm({onClose}: {onClose: () => void}) {
         })
 
         
-        const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+
+        
+        const handleSubmit = (e: React.FormEvent<HTMLButtonElement>) => {
             e.preventDefault();
 
             const payload: PitchPayload = {
                 title,
-                type,
+                pitchTypeId:type,
                 description
             }
             mutation.mutate(payload)
+            
         }
         
        
@@ -102,8 +112,7 @@ export default function PitchModalForm({onClose}: {onClose: () => void}) {
 
         <div className="flex flex-col mb-4">
             <label className="text-sm mb-1 opacity-80">Pitch Type</label>
-        <select
-        className="
+        <select className="
             px-4 py-2.5
             bg-white/10 dark:bg-white/5 
             border border-black/10 dark:border-white/10
@@ -113,10 +122,9 @@ export default function PitchModalForm({onClose}: {onClose: () => void}) {
             focus:ring-2 focus:ring-black/10 dark:focus:ring-white/20
             transition
         "
-        value={type}
         onChange={(e) => setType(e.target.value)}
         >
-        {data.pitchTypes.map((pitchType:{name: string, id: string}) => (
+        {data && data.pitchTypes.map((pitchType:{name: string, id: string}) => (
             <option
             key={pitchType.id}
             value={pitchType.id}
@@ -167,15 +175,15 @@ export default function PitchModalForm({onClose}: {onClose: () => void}) {
         >
             Cancel
         </button>
-        <button
-            className=" py-1 px-2 rounded-none bg-[#f3fded]
-            dark:from-white/20 dark:to-white/10 
-            text-black dark:text-black"
+            <button
+                className=" py-1 px-2 rounded-none bg-[#f3fded]
+                dark:from-white/20 dark:to-white/10 
+                text-black dark:text-black"
 
-            onClick={() => handleSubmit}
-        >
-            {mutation.isPending ? <div className="w-4 h-4 bg-none border border-black animate-spin"></div>:"Start"}
-        </button>
+                onClick={(e) => handleSubmit(e)}
+            >
+                {mutation.isPending ? <div className="w-4 h-4 bg-none border border-black animate-spin"></div>:"Start"}
+            </button>
         </div>
     </motion.div>
   );
