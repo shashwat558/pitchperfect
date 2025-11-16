@@ -71,8 +71,6 @@ export default function PitchModalForm({onClose}: {onClose: () => void}) {
         })
 
         
-
-        
         const handleSubmit = (e: React.FormEvent<HTMLButtonElement>) => {
             e.preventDefault();
 
@@ -123,6 +121,7 @@ export default function PitchModalForm({onClose}: {onClose: () => void}) {
             transition
         "
         onChange={(e) => setType(e.target.value)}
+        value={type}
         >
         {data && data.pitchTypes.map((pitchType:{name: string, id: string}) => (
             <option
