@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, {params}: {params: {id: string}}){
-    const {id} = params;
+export async function GET(req: NextRequest, {params}: {params: Promise<{id: string}>}){
+    const {id} = await params;
     if(!id){
         return NextResponse.json({message: "PitchId required"}, {status: 400});
 
