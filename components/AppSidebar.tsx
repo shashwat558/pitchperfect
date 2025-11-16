@@ -71,8 +71,8 @@ export function AppSidebar({ className }: { className: string }) {
 
       <div
         className={`flex items-center ${
-          isOpen ? "justify-between" : "justify-center"
-        } gap-3 p-3 border-b border-border dark:border-neutral-700`}
+          isOpen ? "justify-between p-2" : "justify-center p-3"
+        } gap-3 border-b border-border dark:border-neutral-700`}
       >
         {isOpen ? (
           <motion.span
@@ -104,8 +104,8 @@ export function AppSidebar({ className }: { className: string }) {
       <div className="border-b border-border dark:border-neutral-700">
         <button
           className={`w-full flex items-center ${
-            isOpen ? "justify-start" : "justify-center"
-          } gap-3 px-4 py-2 hover:bg-muted dark:hover:bg-neutral-800 transition-colors text-foreground dark:text-neutral-200 font-medium`}
+            isOpen ? "justify-start py-2" : "justify-center py-3"
+          } gap-3 px-4  hover:bg-muted dark:hover:bg-neutral-800 transition-colors text-foreground dark:text-neutral-200 font-medium`}
            onClick={() => openRecordModal()}
         >
           <Plus size={17} className="min-w-5" />
@@ -128,7 +128,7 @@ export function AppSidebar({ className }: { className: string }) {
               onClick={() => setActiveItem(item.id)}
               className={`w-full flex items-center ${
                 isOpen ? "" : "justify-center"
-              } gap-3 px-4 py-5 border border-t-0 border-r-0 border-l-0 border-border/40 dark:border-[#394234] rounded-none transition-all overflow-x-hidden ${
+              } gap-3 px-4 py-5 border border-t-0 border-r-0 border-l-0 border-border/40 dark:border-white/10 rounded-none transition-all overflow-x-hidden ${
                 isActive
                   ? "bg-muted dark:bg-neutral-800 text-foreground dark:text-white shadow-sm"
                   : "hover:bg-muted/40 dark:hover:bg-neutral-800 text-foreground dark:text-neutral-300"

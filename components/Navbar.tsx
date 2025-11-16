@@ -45,78 +45,127 @@ const Navbar = ({className}: {className:string}) => {
     show: { opacity: 1, y: 0, transition: { duration: 0 } }
     }
   return (
-    <div className={`${className} ${font.className} w-screen py-3 px-5`}>
-        <div className='flex justify-between items-center px-10'>
-            <div className='px-2 flex gap-2'>
-                <Image src={"/vercel.svg"} alt='logo' width={15} height={16}/>
-                <h1 className='text-lg font-semibold'>PitchPerfect</h1>
+    
 
-            </div>
-            <div className='relative flex justify-center space-x-12 items-center dark:text-[#f0ffe8]'>
+        <div className={`${className} ${font.className} flex justify-center w-screen pt-3 px-5`}>
+
+            <div className="w-[90%] flex justify-between items-center py-2 px-5 border dark:border-white/10 border-gray-400">
+
+            <div className="flex items-center w-1/2 gap-40">
+
+                <div className="flex gap-2 items-center">
+                <Image src={"/vercel.svg"} alt="logo" width={15} height={16} />
+                <h1 className="text-lg font-semibold">PitchPerfect</h1>
+                </div>
+
+
+                <div className="relative flex justify-center space-x-12 items-center dark:text-[#f0ffe8]">
                 <h1>Features</h1>
+
+
                 <div
                     className="relative"
-                    
                     onMouseLeave={() => setIsHovered(false)}
+                >
+                    <h1
+                    className="flex items-center gap-1"
+                    onMouseEnter={() => setIsHovered(true)}
                     >
-                    <h1 className='flex items-center gap-1' onMouseEnter={() => setIsHovered(true)}>Pricing <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className="icon-sm text-token-text-tertiary"><path d="M12.1338 5.94433C12.3919 5.77382 12.7434 5.80202 12.9707 6.02929C13.1979 6.25656 13.2261 6.60807 13.0556 6.8662L12.9707 6.9707L8.47067 11.4707C8.21097 11.7304 7.78896 11.7304 7.52926 11.4707L3.02926 6.9707L2.9443 6.8662C2.77379 6.60807 2.80199 6.25656 3.02926 6.02929C3.25653 5.80202 3.60804 5.77382 3.86617 5.94433L3.97067 6.02929L7.99996 10.0586L12.0293 6.02929L12.1338 5.94433Z"></path></svg></h1>
-                     
+                    Pricing
+                    <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 16 16"
+                        fill="currentColor"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="icon-sm text-token-text-tertiary"
+                    >
+                        <path d="M12.1338 5.94433C12.3919 5.77382 12.7434 5.80202 12.9707 6.02929C13.1979 6.25656 13.2261 6.60807 13.0556 6.8662L12.9707 6.9707L8.47067 11.4707C8.21097 11.7304 7.78896 11.7304 7.52926 11.4707L3.02926 6.9707L2.9443 6.8662C2.77379 6.60807 2.80199 6.25656 3.02926 6.02929C3.25653 5.80202 3.60804 5.77382 3.86617 5.94433L3.97067 6.02929L7.99996 10.0586L12.0293 6.02929L12.1338 5.94433Z"></path>
+                    </svg>
+                    </h1>
+
+
                     <motion.div
                         variants={mainContainer}
                         initial="hidden"
                         animate={isHovered ? "show" : "hidden"}
-                        className={`absolute top-5 -left-10 rounded-none  p-2 min-w-[450px]`}
-                    >
-                       <motion.ul
-                        variants={container}
-                        initial="hidden"
-                        animate={isHovered ? "show" : "hidden"}
-                        className="grid grid-cols-2 gap-2 mt-4 rounded-2xl border border-white/10 bg-black/60 backdrop-blur-lg shadow-[0_8px_30px_rgba(0,0,0,0.6)] p-3 min-w-[320px]"
+                        className="absolute top-5 -left-10 rounded-none p-2 min-w-[450px]"
                         >
-                        {[
+                        <motion.ul
+                            variants={container}
+                            initial="hidden"
+                            animate={isHovered ? "show" : "hidden"}
+                            className="
+                            grid grid-cols-2 gap-3 mt-4 rounded-none
+                            border border-white/20 bg-black/70 dark:bg-black/70
+                            backdrop-blur-md
+                            shadow-[0_8px_30px_rgba(0,0,0,0.45)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.6)]
+                            p-4 min-w-[340px]
+                            "
+                        >
+                            {[
                             { name: "Basic", desc: "For individuals starting out" },
                             { name: "Pro", desc: "For small teams scaling fast" },
                             { name: "Ultra Pro", desc: "For enterprises & heavy users" },
                             { name: "Custom", desc: "Tailored solutions on request" },
-                        ].map((plan) => (
+                            ].map((plan) => (
                             <motion.li
-                            key={plan.name}
-                            variants={item}
-                            className={`group relative flex flex-col justify-center rounded-md border border-white/5 bg-white/5 px-4 py-3 hover:border-white/20 hover:bg-white/10 transition-all duration-200 cursor-pointer`}
+                                key={plan.name}
+                                variants={item}
+                                className={`
+                                group relative flex flex-col justify-center rounded-none
+                                border border-white/30 dark:border-white/40
+                                bg-white/10 dark:bg-white/5
+                                px-4 py-3
+                                hover:border-white/50 hover:bg-white/20 dark:hover:bg-white/15
+                                transition-all duration-200 cursor-pointer
+                                text-white
+                                `}
                             >
-                         
-                            <h3 className="text-white text-sm font-medium group-hover:text-white">
+                                <h3 className="text-sm font-semibold group-hover:text-white">
                                 {plan.name}
-                            </h3>
-                            <p className="text-gray-400 text-xs">{plan.desc}</p>
-                            {plan.name === "Pro" && (
-                                <BorderBeam
-                                size={40}
-                                duration={20}
-                                colorFrom="#92ff6c"
-                                colorTo="#a0ffea"
-                                borderWidth={1.5}
-                                className="rounded-md"
-                                />
-                            )}
-                            </motion.li>
-                        ))}
-                        </motion.ul>
+                                </h3>
+                                <p className="text-xs text-gray-300 dark:text-gray-400">
+                                {plan.desc}
+                                </p>
 
-                    </motion.div>
-                    </div>
+                                {/* Pro badge glow */}
+                                {plan.name === "Pro" && (
+                                <BorderBeam
+                                    size={40}
+                                    duration={10}
+                                    colorFrom="#92ff6c"
+                                    colorTo="#a0ffea"
+                                    borderWidth={1.5}
+                                    className="rounded-md"
+                                />
+                                )}
+                            </motion.li>
+                            ))}
+                        </motion.ul>
+                        </motion.div>
+                                        </div>
 
                 <h1>About</h1>
                 <h1>Examples</h1>
-
-                <div className='flex items-center gap-2'>
-                    <button className='px-2 font-semibold dark:bg-[#183b05] rounded-sm' >Sign In</button>
-                    <ThemeToggle />
                 </div>
             </div>
+
+
+            <div className="flex items-center gap-2">
+                <button className="px-2 p-1 font-semibold dark:bg-gray-100 rounded-none bg-gray-900 dark:text-gray-900 text-gray-300 shadow-[inset_0px_10px_20px_10px_#00000024,inset_0px_-12px_8px_0px_#00000024]">
+                Sign In
+                </button>
+                <ThemeToggle /> 
+                <button className="corner-only px-4 py-2 text-sm">
+  Read Docs
+</button>
+            </div>
+            </div>
         </div>
-    </div>
-  )
+);
+
+  
 }
 
 export default Navbar

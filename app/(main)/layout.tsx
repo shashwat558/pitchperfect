@@ -26,7 +26,7 @@ export default function RootLayout({
         className={`relative ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider defaultTheme="light"  attribute="class">
-          <Navbar className="absolute top-0"/>
+          
         {children}
         </ThemeProvider>
       </section>

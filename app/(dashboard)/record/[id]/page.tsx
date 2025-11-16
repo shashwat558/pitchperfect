@@ -22,9 +22,15 @@ export default function Record() {
         initial={{ opacity: 0, y: 25, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative w-[90%] h-[80%] rounded-none border border-foreground/10 dark:border-foreground/20 
-                   bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-lg p-6 flex flex-col"
+        className="
+          relative w-[90%] h-[85%] rounded-none border border-foreground/10 dark:border-foreground/20
+          bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-lg p-6 flex flex-col
+          corner-border
+        "
       >
+        <div className="cb-2"></div>
+<div className="cb-3"></div>
+
 
         <motion.div
           initial="hidden"
@@ -43,6 +49,7 @@ export default function Record() {
           >
             Record the next big thing!!
           </motion.h1>
+          
 
           <motion.h2
             variants={fadeUp}
