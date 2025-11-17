@@ -1,6 +1,6 @@
 'use client'
 
-import { Trash, Trash2 } from "lucide-react";
+import { PauseIcon, PlayIcon, Trash, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type RecordingProps  = {
@@ -15,8 +15,10 @@ type RecordingProps  = {
 enum State {
   Ready="ready",
   Recording = "recording",
+  pause = "pause",
   Stopped = "stopped",
-  CountDown = "ready.countdown"
+  CountDown = "ready.countdown",
+  
 }
 
 const options = {
@@ -37,27 +39,39 @@ export function Recorder({duration}: {duration: number}) {
   const streamRef = useRef<MediaStream>(null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(3);
+  const [hasConsent, setHasConsent] = useState(false);
 
-  const handleStartRecording = async () => {
-    if(recordingState === "ready"){
+  console.log(recordingState)
+
+  useEffect(() => {
+    const consent = async () => {
+      if(recordingState === State.Ready){
         const mediaStream = await navigator.mediaDevices.getUserMedia({
-          audio: options.audio, 
+          audio: options.audio,
           video: {
-            frameRate: options.frameRate,
-
-          }  
-        });
-
-
+            frameRate: options.frameRate
+          }
+        })
+        
         streamRef.current = mediaStream
-        if(videoRef.current){
-          videoRef.current.srcObject = mediaStream;
+        setHasConsent(true)
+        if(videoRef.current && streamRef.current){
+          videoRef.current.srcObject = streamRef.current;
           videoRef.current.play()
         }
+      }
+    }
+
+    consent()
+  }, [recordingState])
+
+  const handleStartRecording = async () => {
+    
+        
 
         await countdown()
 
-        const recorder = new MediaRecorder(mediaStream, {
+        const recorder = new MediaRecorder(streamRef.current!, {
           mimeType: options.mimeType,
           audioBitsPerSecond: options.audioBitsPerSecond,
           videoBitsPerSecond: options.videoBitsPerSecond
@@ -73,6 +87,7 @@ export function Recorder({duration}: {duration: number}) {
         };
 
         recorder.onstop = handleStop
+        recorder.onpause = handlePause
 
         recorder.start();
         setRecordingState(State.Recording);
@@ -81,7 +96,7 @@ export function Recorder({duration}: {duration: number}) {
 
         
     }
-  }
+  
 
   const handleStop = () => {
     if(recordingState === State.Recording){
@@ -92,6 +107,19 @@ export function Recorder({duration}: {duration: number}) {
     const url = URL.createObjectURL(blob);
     setMediaUrl(url);
     setRecordingState(State.Stopped);
+  }
+
+  const handlePause = () => {
+    if(recordingState === State.Recording){
+      recorderRef.current?.pause();
+      setRecordingState(State.pause);
+    }
+    if(recordingState === State.pause){
+      recorderRef.current?.resume();
+      setRecordingState(State.Recording)
+    }
+
+    
   }
 
   const deleteMedia = () => {
@@ -145,10 +173,13 @@ export function Recorder({duration}: {duration: number}) {
       <div className="cb-3"></div>
       
            
-        {(recordingState === State.Ready ||
-          recordingState === State.CountDown ||
-          recordingState === State.Recording) && (
-          <video ref={videoRef} autoPlay muted className="w-full h-full object-cover"></video>
+        {hasConsent && !mediaUrl && (
+          <video 
+            ref={videoRef} 
+            autoPlay 
+            muted 
+            className="scale-x-[-1] w-full h-full object-cover"
+          />
         )}
         {mediaUrl && <video controls autoPlay src={mediaUrl} className="w-full h-full object-cover"></video>}
         
@@ -180,7 +211,7 @@ export function Recorder({duration}: {duration: number}) {
           </button>
         ) : (
 
-
+         <div>
           <button
             className="
               bg-red-500 
@@ -196,8 +227,27 @@ export function Recorder({duration}: {duration: number}) {
             "
             onClick={handleStop}
           >
-            <div className="w-4 h-4 bg-white"></div>
+            {<div className="w-4 h-4 bg-white"></div>}
           </button>
+          <button
+            className="
+              dark:bg-black 
+              font-semibold 
+              dark:text-white 
+              border 
+              dark:border-white/55 
+              px-5 py-2 
+              transition-all duration-150
+              shadow-[5px_4px_0px_0px_rgba(66,68,90,1)]
+              active:translate-x-0.5 active:translate-y-0.5
+              active:shadow-[3px_2px_0px_0px_rgba(66,68,90,1)]
+            "
+            onClick={handlePause}
+          >
+            {recordingState === State.pause ?(<PlayIcon className="w-4 h-4"/>):(<PauseIcon className="w-4 h-4"/>) }
+          </button>
+
+          </div>
         )}
 
 
