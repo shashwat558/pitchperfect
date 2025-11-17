@@ -148,6 +148,22 @@
 }
 
 
+.corner-border {
+  position: relative;
+}
+
+.corner-border::before,
+.corner-border::after,
+.corner-border .cb-2,
+.corner-border .cb-3 {
+  content: "";
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  border: 2px solid rgba(255,255,255,0.5); /* adjust if needed */
+}
+
+
 .corner-border::before {
   top: -1px;
   left: -1px;

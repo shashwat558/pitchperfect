@@ -1,6 +1,7 @@
 'use client'
 
-import { useRef, useState } from "react";
+import { Trash, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type RecordingProps  = {
   options?:{
@@ -14,7 +15,8 @@ type RecordingProps  = {
 enum State {
   Ready="ready",
   Recording = "recording",
-  Stopped = "stopped"
+  Stopped = "stopped",
+  CountDown = "ready.countdown"
 }
 
 const options = {
@@ -26,15 +28,15 @@ const options = {
 }
 
 export function Recorder({duration}: {duration: number}) {
-
- 
+   
+  console.log(duration)
   const [recordingState, setRecordingState] = useState<State>(State.Ready);
   const videoRef = useRef<HTMLVideoElement>(null);
   const recorderRef = useRef<MediaRecorder>(null);
   const chunks = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream>(null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
-  let timer: number;
+  const [seconds, setSeconds] = useState(3);
 
   const handleStartRecording = async () => {
     if(recordingState === "ready"){
@@ -44,12 +46,16 @@ export function Recorder({duration}: {duration: number}) {
             frameRate: options.frameRate,
 
           }  
-        })
+        });
+
+
         streamRef.current = mediaStream
         if(videoRef.current){
           videoRef.current.srcObject = mediaStream;
           videoRef.current.play()
         }
+
+        await countdown()
 
         const recorder = new MediaRecorder(mediaStream, {
           mimeType: options.mimeType,
@@ -98,26 +104,116 @@ export function Recorder({duration}: {duration: number}) {
     
   }
 
+  function countdown() {
+  setSeconds(3);
+  setRecordingState(State.CountDown);
 
-  
+  return new Promise<void>((resolve) => {
+    let current = 3;
 
+    const interval = setInterval(() => {
+      current -= 1;
+      setSeconds(current);
 
-
+      if (current <= 0) {
+        clearInterval(interval);
+        setRecordingState(State.Ready);
+        resolve();
+      }
+    }, 1000);
+  });
+}
 
   return (
-    
-      <div className="h-[90%] aspect-video border dark:border-white/20 border-black/20 corner-border">
-        <div className="cb-2"></div>
-        <div className="cb-3"></div>
-        {recordingState === State.Ready ? (<button onClick={handleStartRecording}>Start</button>): (<button onClick={handleStop}>Stop </button>)}
-        {(recordingState === State.Ready || recordingState === State.Recording) && (
-          <video ref={videoRef} autoPlay muted className="scale-x-[-1]"></video>
+    <div className="relative w-full h-full flex flex-col justify-start items-start gap-2">
+      {recordingState === State.CountDown && (
+          <div
+            className="
+              absolute inset-0 
+              left-[70%] top-0
+              flex items-center justify-center
+              bg-black/40 backdrop-blur-sm
+              text-8xl font-extrabold
+              animate-pulse
+            "
+          >
+            {seconds}
+          </div>
         )}
-        {mediaUrl && <video autoPlay src={mediaUrl}></video>}
-        {mediaUrl && <button onClick={deleteMedia}>delete</button>}
+      <div className="h-[85%] aspect-video border dark:border-white/20 border-black/20 corner-border p-0.5">
+      <div className="cb-2"></div>
+      <div className="cb-3"></div>
+      
+           
+        {(recordingState === State.Ready ||
+          recordingState === State.CountDown ||
+          recordingState === State.Recording) && (
+          <video ref={videoRef} autoPlay muted className="w-full h-full object-cover"></video>
+        )}
+        {mediaUrl && <video controls autoPlay src={mediaUrl} className="w-full h-full object-cover"></video>}
+        
+         
+       
+        
+        
       </div>
+      <div className="flex justify-around items-center gap-3 relative">
 
+        {recordingState === State.Ready ? (
+          <button
+            className="
+              dark:bg-black 
+              font-semibold 
+              dark:text-white 
+              border 
+              dark:border-white/55 
+              px-4 py-2 
+              transition-all duration-150
+              shadow-[5px_4px_0px_0px_rgba(66,68,90,1)]
+              active:translate-x-0.5 active:translate-y-0.5
+              active:shadow-[3px_2px_0px_0px_rgba(66,68,90,1)]
+            "
+            onClick={handleStartRecording}
+            
+          >
+            Start
+          </button>
+        ) : (
+
+
+          <button
+            className="
+              bg-red-500 
+              font-semibold 
+              dark:text-white 
+              border 
+              dark:border-white/55 
+              px-5 py-2 
+              transition-all duration-150
+              shadow-[5px_4px_0px_0px_rgba(66,68,90,1)]
+              active:translate-x-0.5 active:translate-y-0.5
+              active:shadow-[3px_2px_0px_0px_rgba(66,68,90,1)]
+            "
+            onClick={handleStop}
+          >
+            <div className="w-4 h-4 bg-white"></div>
+          </button>
+        )}
+
+
+        
+
+
+
+      {mediaUrl && <button  className="dark:bg-black flex items-center gap-1 dark:text-white border dark:border-white/55 px-4 py-2 transition-all duration-150 shadow-[5px_4px_0px_0px_rgba(66,68,90,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[3px_2px_0px_0px_rgba(66,68,90,1)]" onClick={deleteMedia}>Delete <Trash2 className="font-light w-4 h-4"/></button>}
+
+      </div>
+    </div>
 
     
   )
 }
+
+
+
+

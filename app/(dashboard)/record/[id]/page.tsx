@@ -78,11 +78,10 @@ export default function Record({params}: {params: Promise<{id: string}>}) {
         className="
           relative w-[90%] h-[85%] rounded-none border border-foreground/10 dark:border-foreground/20
           bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-lg p-6 flex flex-col
-          corner-border
+          
         "
       >
-        <div className="cb-2"></div>
-        <div className="cb-3"></div>
+        
 
 
         <motion.div
@@ -118,9 +117,9 @@ export default function Record({params}: {params: Promise<{id: string}>}) {
             </span>
           </motion.h2>
         </motion.div>
-        <div className="w-full h-full flex justify-start items-start">
-        <Recorder />
-        </div>
+        
+        <Recorder duration={pitchDetails.pitch_type.duration} />
+        
       </motion.div>
     </div>
   );

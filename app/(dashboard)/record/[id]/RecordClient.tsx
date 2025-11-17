@@ -30,7 +30,7 @@ export default function RecordClient() {
         "
       >
         <div className="cb-2"></div>
-<div className="cb-3"></div>
+        <div className="cb-3"></div>
 
 
         <motion.div
