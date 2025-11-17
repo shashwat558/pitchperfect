@@ -43,10 +43,14 @@ export function Recorder({duration}: {duration: number}) {
   const [hasConsent, setHasConsent] = useState(false);
   const [faceDetector, setFaceDetector] = useState<FaceLandmarker | null>(null);
   const [detectionRunning, setDetectionRunning] = useState(false);
-  
+  const timingRef = useRef<number | null>(null);
 
+  useEffect(() => {
+    if(timingRef.current == null){
+      timingRef.current = performance.now();
 
-
+    }
+  }, [])
   console.log(recordingState)
 
  
@@ -62,7 +66,7 @@ export function Recorder({duration}: {duration: number}) {
           vision,
           {
             baseOptions: {
-              modelAssetPath: "/models/blaze_face_short_range.tflite",
+              modelAssetPath: "/mediapipe/face_landmarker.task",
               delegate: "GPU",
 
 
@@ -188,7 +192,7 @@ export function Recorder({duration}: {duration: number}) {
 
     }
 
-    const result = faceDetector.detectForVideo(videoRef.current, performance.now());
+    const result = faceDetector.detectForVideo(videoRef.current, timingRef.current!);
     if(result.faceLandmarks && result.faceLandmarks.length > 0){
       result.faceLandmarks.forEach(landmarks => {
         console.log("Detected Landmarks:", landmarks);
