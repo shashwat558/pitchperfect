@@ -32,6 +32,7 @@ export function Recorder({duration}: {duration: number}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const recorderRef = useRef<MediaRecorder>(null);
   const chunks = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream>(null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   let timer: number;
 
@@ -44,6 +45,7 @@ export function Recorder({duration}: {duration: number}) {
 
           }  
         })
+        streamRef.current = mediaStream
         if(videoRef.current){
           videoRef.current.srcObject = mediaStream;
           videoRef.current.play()
@@ -79,6 +81,7 @@ export function Recorder({duration}: {duration: number}) {
     if(recordingState === State.Recording){
       recorderRef.current?.stop();
     }
+    streamRef.current?.getTracks().forEach(track => track.stop())
     const blob = new Blob(chunks.current, {type: options.mimeType});
     const url = URL.createObjectURL(blob);
     setMediaUrl(url);
