@@ -32,7 +32,7 @@ export function Recorder({duration}: {duration: number}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const recorderRef = useRef<MediaRecorder>(null);
   const chunks = useRef<Blob[]>([]);
-  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   let timer: number;
 
   const handleStartRecording = async () => {
@@ -64,17 +64,35 @@ export function Recorder({duration}: {duration: number}) {
           }
         };
 
-        recorder.onstop = (e) => {
-          const blob = new Blob(chunks.current, {type: "video/mp4"});
-          const url = URL.createObjectURL(blob);
-          setMediaUrl(url)
-        }
+        recorder.onstop = handleStop
+
+        recorder.start();
         setRecordingState(State.Recording);
         console.log("mediaRecorder Started");
 
 
         
     }
+  }
+
+  const handleStop = () => {
+    if(recordingState === State.Recording){
+      recorderRef.current?.stop();
+    }
+    const blob = new Blob(chunks.current, {type: options.mimeType});
+    const url = URL.createObjectURL(blob);
+    setMediaUrl(url);
+    setRecordingState(State.Stopped);
+  }
+
+  const deleteMedia = () => {
+    chunks.current = [];
+    videoRef.current = null;
+
+    recorderRef.current?.stop()
+    setMediaUrl(null);
+    setRecordingState(State.Ready)
+    
   }
 
 
@@ -88,10 +106,14 @@ export function Recorder({duration}: {duration: number}) {
       <div className="h-[90%] aspect-video border dark:border-white/20 border-black/20 corner-border">
         <div className="cb-2"></div>
         <div className="cb-3"></div>
-
-        <video ref={videoRef}></video>
-        
+        {recordingState === State.Ready ? (<button onClick={handleStartRecording}>Start</button>): (<button onClick={handleStop}>Stop </button>)}
+        {(recordingState === State.Ready || recordingState === State.Recording) && (
+          <video ref={videoRef} autoPlay muted className="scale-x-[-1]"></video>
+        )}
+        {mediaUrl && <video autoPlay src={mediaUrl}></video>}
+        {mediaUrl && <button onClick={deleteMedia}>delete</button>}
       </div>
+
 
     
   )
