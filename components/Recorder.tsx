@@ -49,105 +49,107 @@ export function Recorder({ duration }: { duration: number }) {
   console.log("hi my name is tony soprano")
 
 
-useEffect(() => {
-  const initializeFaceDetector = async () => {
-    try {
-      const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-      );
-
-      const detector = await FaceLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath: "/mediapipe/face_landmarker.task",
-          delegate: "GPU",
-        },
-        runningMode: "VIDEO",
-        numFaces: 1,
-      });
-
-      faceDetectorRef.current = detector;
-      console.log("Face detector initialized");
-    } catch (error) {
-      console.error("Error initializing FaceDetector", error);
-    }
-  };
-
-  initializeFaceDetector();
-}, []);
-
-
-  const detect = () => {
-  const detector = faceDetectorRef.current;
-  const video = videoRef.current;
-
-  if (!detector || !video || !detectionRunningRef.current) return;
-
-  if (video.videoWidth === 0 || video.videoHeight === 0) {
-    return requestAnimationFrame(detect);
-  }
-
-  const now = performance.now();
-  const result = detector.detectForVideo(video, now);
-
-  if (result.faceLandmarks?.length) {
-    console.log("Detected landmarks:", result.faceLandmarks[0]);
-  } else {
-    console.log("No face detected this frame");
-  }
-
-  requestAnimationFrame(detect);
-};
-
-const startDetectionLoop = () => {
-  if (!faceDetectorRef.current || !hasConsent) return;
-
-  if (!detectionRunningRef.current) {
-    detectionRunningRef.current = true;
-    console.log("Detection loop started");
-    requestAnimationFrame(detect);
-  }
-};
-
- 
-
   useEffect(() => {
-  if (recordingState === State.Ready) {
-    const getStream = async () => {
+    const initializeFaceDetector = async () => {
       try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-          audio: options.audio,
-          video: { frameRate: options.frameRate },
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+        );
+
+        const detector = await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: "/mediapipe/face_landmarker.task",
+            delegate: "GPU",
+          },
+          runningMode: "VIDEO",
+          numFaces: 1,
+          minFacePresenceConfidence: 0.7,
+          outputFaceBlendshapes: true
         });
 
-        streamRef.current = mediaStream;
-        setHasConsent(true);
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play();
-            console.log("Video metadata loaded, starting detection…");
-            
-          };
-        }
-      } catch (err) {
-        console.error("Error accessing media devices:", err);
+        faceDetectorRef.current = detector;
+        console.log("Face detector initialized");
+      } catch (error) {
+        console.error("Error initializing FaceDetector", error);
       }
     };
 
-    getStream();
-  }
-}, [recordingState]);
+    initializeFaceDetector();
+  }, []);
+
+
+  const detect = () => {
+    const detector = faceDetectorRef.current;
+    const video = videoRef.current;
+
+    if (!detector || !video || !detectionRunningRef.current) return;
+
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      return requestAnimationFrame(detect);
+    }
+
+    const now = performance.now();
+    const result = detector.detectForVideo(video, now);
+
+    if (result.faceLandmarks?.length) {
+      console.log("Detected landmarks:", result.faceLandmarks[0]);
+    } else {
+      console.log("No face detected this frame");
+    }
+
+    requestAnimationFrame(detect);
+  };
+
+  const startDetectionLoop = () => {
+    if (!faceDetectorRef.current || !hasConsent) return;
+
+    if (!detectionRunningRef.current) {
+      detectionRunningRef.current = true;
+      console.log("Detection loop started");
+      requestAnimationFrame(detect);
+    }
+  };
 
 
 
-  
   useEffect(() => {
-  if (faceDetectorRef.current && hasConsent) {
-    startDetectionLoop();
-  }
-}, [hasConsent]);
+    if (recordingState === State.Ready) {
+      const getStream = async () => {
+        try {
+          const mediaStream = await navigator.mediaDevices.getUserMedia({
+            audio: options.audio,
+            video: { frameRate: options.frameRate },
+          });
+
+          streamRef.current = mediaStream;
+          setHasConsent(true);
+
+          if (videoRef.current) {
+            videoRef.current.srcObject = mediaStream;
+
+            videoRef.current.onloadedmetadata = () => {
+              videoRef.current?.play();
+              console.log("Video metadata loaded, starting detection…");
+
+            };
+          }
+        } catch (err) {
+          console.error("Error accessing media devices:", err);
+        }
+      };
+
+      getStream();
+    }
+  }, [recordingState]);
+
+
+
+
+  useEffect(() => {
+    if (faceDetectorRef.current && hasConsent) {
+      startDetectionLoop();
+    }
+  }, [hasConsent]);
 
 
   const handleStartRecording = async () => {
@@ -173,7 +175,7 @@ const startDetectionLoop = () => {
     recorder.onpause = handlePause
 
     recorder.start();
-    
+
     setRecordingState(State.Recording);
     console.log("mediaRecorder Started");
 
@@ -215,12 +217,12 @@ const startDetectionLoop = () => {
 
     recorderRef.current?.stop()
     setMediaUrl(null);
-    
+
     setRecordingState(State.Ready)
 
   }
 
-  
+
   function countdown() {
     setSeconds(3);
     setRecordingState(State.CountDown);
