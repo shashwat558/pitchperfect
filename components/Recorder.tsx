@@ -194,11 +194,20 @@ export function Recorder({ duration }: { duration: number }) {
 
     await countdown()
 
+    chunkStartTime.current = performance.now();
+    currentChunkIndex.current = 0;
+    eyeContactSamples.current = 0;
+    smileSum.current = 0;
+    eyeContactSum.current = 0;
+
+
     const recorder = new MediaRecorder(streamRef.current!, {
       mimeType: options.mimeType,
       audioBitsPerSecond: options.audioBitsPerSecond,
       videoBitsPerSecond: options.videoBitsPerSecond
     })
+
+
     startDetectionLoop()
     recorderRef.current = recorder;
     chunks.current = [];
@@ -206,6 +215,23 @@ export function Recorder({ duration }: { duration: number }) {
     recorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
         chunks.current.push(e.data)
+
+        const audioBlob = e.data;
+
+        const eyeContactPct = eyeContactSamples.current > 0 
+        ? eyeContactSum.current / eyeContactSamples.current
+        : 0
+
+        const avgSmile = eyeContactSamples.current > 0 
+        ? smileSum.current / eyeContactSamples.current : 0
+
+        // await fetch()
+
+        eyeContactSum.current = 0;
+        smileSum.current = 0;
+        eyeContactSamples.current = 0;
+        chunkStartTime.current = performance.now()
+        currentChunkIndex.current++ 
       }
     };
 
