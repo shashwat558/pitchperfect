@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { PauseIcon, PlayIcon, Trash, Trash2 } from "lucide-react";
@@ -30,6 +31,13 @@ const options = {
   audio: true,
 }
 
+const getScore = (categories: any, name: any) => {
+  return categories.find((c:any) => c.categoryName === name)?.score ?? 0;
+
+}
+
+
+
 export function Recorder({ duration }: { duration: number }) {
 
   console.log(duration)
@@ -43,6 +51,12 @@ export function Recorder({ duration }: { duration: number }) {
   const [hasConsent, setHasConsent] = useState(false);
   const detectionRunningRef = useRef(false);
   const faceDetectorRef = useRef<FaceLandmarker | null>(null);
+  const chunkStartTime = useRef<number>(0);
+  const eyeContactSum = useRef<number>(0);
+  const smileSum = useRef<number>(0);
+  const eyeContactSamples = useRef<number>(0);
+  const currentChunkIndex = useRef<number>(0);
+  const pendingFacialData = useRef<any[]>([]);
 
 
   console.log(recordingState)
@@ -61,10 +75,12 @@ export function Recorder({ duration }: { duration: number }) {
             modelAssetPath: "/mediapipe/face_landmarker.task",
             delegate: "GPU",
           },
+          
           runningMode: "VIDEO",
           numFaces: 1,
           minFacePresenceConfidence: 0.7,
-          outputFaceBlendshapes: true
+          outputFaceBlendshapes: true,
+          outputFacialTransformationMatrixes: true
         });
 
         faceDetectorRef.current = detector;
@@ -91,12 +107,34 @@ export function Recorder({ duration }: { duration: number }) {
     const now = performance.now();
     const result = detector.detectForVideo(video, now);
 
-    if (result.faceLandmarks?.length) {
-      console.log("Detected landmarks:", result.faceLandmarks[0]);
-    } else {
-      console.log("No face detected this frame");
+    const faceBlendShape = result.faceBlendshapes[0];
+
+    const b = faceBlendShape.categories;
+
+    const eyeLookOutLeft = getScore(b, "eyeLookOutLeft");
+    const eyeLookOutRight = getScore(b, "eyeLookOutRight");
+    const eyeLookUp = getScore(b, "eyeLookUpLeft") + getScore(b, "eyeLookUpRight");
+    const eyeLookDown = getScore(b, "eyeLookDownLeft") + getScore(b, "eyeLookDownRight");
+
+    const gazeDeviation = eyeLookOutRight + eyeLookOutLeft + eyeLookDown + eyeLookUp;
+
+    const isLookingAtCamera = gazeDeviation < 0.22;
+
+    const smileIntensity = getScore(b, "mouthSmileLeft") + getScore(b, "mouthSmileRight") * 0.5;
+
+    // const rotation = result.facialTransformationMatrixes[0].data;
+
+   
+
+    if( now - chunkStartTime.current < 1000) {
+      eyeContactSum.current += isLookingAtCamera ? 1 : 0
+      smileSum.current+= smileIntensity;
+      eyeContactSamples.current++
     }
 
+    
+
+    
     requestAnimationFrame(detect);
   };
 
@@ -146,7 +184,7 @@ export function Recorder({ duration }: { duration: number }) {
 
 
   useEffect(() => {
-    if (faceDetectorRef.current && hasConsent) {
+    if (faceDetectorRef.current && hasConsent && videoRef.current?.readyState === 4) {
       startDetectionLoop();
     }
   }, [hasConsent]);
