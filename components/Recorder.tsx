@@ -80,7 +80,8 @@ export function Recorder({ duration }: { duration: number }) {
           numFaces: 1,
           minFacePresenceConfidence: 0.7,
           outputFaceBlendshapes: true,
-          outputFacialTransformationMatrixes: true
+          outputFacialTransformationMatrixes: true,
+          
         });
 
         faceDetectorRef.current = detector;
@@ -116,13 +117,23 @@ export function Recorder({ duration }: { duration: number }) {
     const eyeLookUp = getScore(b, "eyeLookUpLeft") + getScore(b, "eyeLookUpRight");
     const eyeLookDown = getScore(b, "eyeLookDownLeft") + getScore(b, "eyeLookDownRight");
 
-    const gazeDeviation = eyeLookOutRight + eyeLookOutLeft + eyeLookDown + eyeLookUp;
+    const gazeDeviation =
+    getScore(b, "eyeLookOutLeft")   + getScore(b, "eyeLookOutRight") +
+    getScore(b, "eyeLookUpLeft")    + getScore(b, "eyeLookUpRight") +
+    getScore(b, "eyeLookDownLeft")  + getScore(b, "eyeLookDownRight");
 
-    const isLookingAtCamera = gazeDeviation < 0.22;
+
+    const isLookingAtCamera = gazeDeviation < 0.49;
 
     const smileIntensity = getScore(b, "mouthSmileLeft") + getScore(b, "mouthSmileRight") * 0.5;
 
     // const rotation = result.facialTransformationMatrixes[0].data;
+
+    console.log({
+    gazeDeviation: gazeDeviation.toFixed(3),
+    eyeContact: isLookingAtCamera ? 1 : 0,
+    smileIntensity: smileIntensity   // ← now 0.4–0.9 when smiling
+  });
 
    
 
@@ -226,7 +237,9 @@ export function Recorder({ duration }: { duration: number }) {
         ? smileSum.current / eyeContactSamples.current : 0
 
         // await fetch()
-
+        console.log(avgSmile, eyeContactPct, audioBlob)
+        
+        
         eyeContactSum.current = 0;
         smileSum.current = 0;
         eyeContactSamples.current = 0;
@@ -238,7 +251,7 @@ export function Recorder({ duration }: { duration: number }) {
     recorder.onstop = handleStop
     recorder.onpause = handlePause
 
-    recorder.start();
+    recorder.start(1000);
 
     setRecordingState(State.Recording);
     console.log("mediaRecorder Started");
