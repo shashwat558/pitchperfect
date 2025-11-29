@@ -123,17 +123,13 @@ export function Recorder({ duration }: { duration: number }) {
     getScore(b, "eyeLookDownLeft")  + getScore(b, "eyeLookDownRight");
 
 
-    const isLookingAtCamera = gazeDeviation < 0.49;
+    const isLookingAtCamera = gazeDeviation < 0.65;
 
     const smileIntensity = getScore(b, "mouthSmileLeft") + getScore(b, "mouthSmileRight") * 0.5;
 
     // const rotation = result.facialTransformationMatrixes[0].data;
 
-    console.log({
-    gazeDeviation: gazeDeviation.toFixed(3),
-    eyeContact: isLookingAtCamera ? 1 : 0,
-    smileIntensity: smileIntensity   // ← now 0.4–0.9 when smiling
-  });
+
 
    
 
@@ -232,7 +228,7 @@ export function Recorder({ duration }: { duration: number }) {
         const eyeContactPct = eyeContactSamples.current > 0 
         ? eyeContactSum.current / eyeContactSamples.current
         : 0
-
+        console.log(eyeContactSamples)
         const avgSmile = eyeContactSamples.current > 0 
         ? smileSum.current / eyeContactSamples.current : 0
 
