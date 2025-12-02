@@ -38,7 +38,7 @@ const getScore = (categories: any, name: any) => {
 
 
 
-export function Recorder({ duration }: { duration: number }) {
+export function Recorder({ duration, pitchId }: { duration: number, pitchId:string }) {
 
   console.log(duration)
   const [recordingState, setRecordingState] = useState<State>(State.Ready);
@@ -57,6 +57,9 @@ export function Recorder({ duration }: { duration: number }) {
   const eyeContactSamples = useRef<number>(0);
   const currentChunkIndex = useRef<number>(0);
   const pendingFacialData = useRef<any[]>([]);
+  const form = new FormData();
+
+
 
 
   console.log(recordingState)
@@ -219,21 +222,30 @@ export function Recorder({ duration }: { duration: number }) {
     recorderRef.current = recorder;
     chunks.current = [];
 
-    recorder.ondataavailable = (e) => {
+    recorder.ondataavailable = async (e) => {
       if (e.data.size > 0) {
         chunks.current.push(e.data)
 
-        const audioBlob = e.data;
+        const arrayBuffer =await  e.data.arrayBuffer();
 
         const eyeContactPct = eyeContactSamples.current > 0 
         ? eyeContactSum.current / eyeContactSamples.current
         : 0
-        console.log(eyeContactSamples)
+        console.log(eyeContactSamples.current)
         const avgSmile = eyeContactSamples.current > 0 
         ? smileSum.current / eyeContactSamples.current : 0
 
-        // await fetch()
-        console.log(avgSmile, eyeContactPct, audioBlob)
+        form.append("pitchId", pitchId);
+        form.append("eyeContact", String(eyeContactPct));
+        form.append("smileIntensity", String(avgSmile));
+        form.append("audio", new Blob([arrayBuffer], {type: e.data.type || "audi/webm"}));
+
+
+        await fetch("/api/pitch/stream", {
+          method: "POST",        
+          body: form          
+        })
+        console.log(avgSmile, eyeContactPct)
         
         
         eyeContactSum.current = 0;

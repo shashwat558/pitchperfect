@@ -3,8 +3,9 @@ import {createOpenRouter} from "@openrouter/ai-sdk-provider";
 import {generateObject} from "ai";
 import {z} from "zod";
 import {createClient} from "@deepgram/sdk";
+import { prisma } from "@/lib/prisma";
 
-export const runtime = 'edge';
+
 
 const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
 
@@ -52,14 +53,37 @@ const evaluationFunction = async ({systemPrompt, facials:{eyeContact, smileInten
 
 
 export async function POST(req:NextRequest){
-  const {systemPrompt, pitchId, audio, facial: {eyeContactPct, smileIntensity}} = await req.json();
+  const formData = await req.formData();
+
+  const pitchId = formData.get("pitchId") as string;
+  const eyeContact = Number(formData.get("eyeContact"));
+  const smileIntensity = Number(formData.get("smileIntensity"));
+
+  const audioFile = formData.get("audio") as File;
+  const arrayBuffer = await audioFile.arrayBuffer();
+  const audioBuffer = Buffer.from(arrayBuffer);
 
   if(!pitchId){
     return NextResponse.json({error: "pitchId required"}, {status: 400});
 
   }
 
-  const audioBuffer = Buffer.from(audio);
+  const systemPrompt = await prisma.pitch.findFirst({
+    where: {
+      id: pitchId,
+
+    },
+    select: {
+      pitch_type: {
+        select: {
+          system_prompt: true
+        }
+      }
+    }
+  });
+
+
+
 
   const {result, error} = await deepgram.listen.prerecorded.transcribeFile(
     audioBuffer,
@@ -79,14 +103,17 @@ export async function POST(req:NextRequest){
 
   if(!error){
     const transcript = result.results.channels[0].alternatives[0].transcript;
-    const aiResponse = await evaluationFunction({systemPrompt: systemPrompt, facials: {
-      eyeContact: eyeContactPct,
+    
+    if(!systemPrompt?.pitch_type?.system_prompt) {
+      return NextResponse.json({error: "System prompt not found"}, {status: 400});
+    }
+    
+    const aiResponse = await evaluationFunction({systemPrompt: systemPrompt.pitch_type.system_prompt, facials: {
+      eyeContact: eyeContact,
       smileIntensity: smileIntensity
     }, transcription: transcript});
 
-    console.log(aiResponse);
-
-    
+    console.log(aiResponse);    
   }
 
 

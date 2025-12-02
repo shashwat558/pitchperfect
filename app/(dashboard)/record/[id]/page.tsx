@@ -118,7 +118,7 @@ export default function Record({params}: {params: Promise<{id: string}>}) {
           </motion.h2>
         </motion.div>
         
-        <Recorder duration={pitchDetails.pitch_type.duration} />
+        <Recorder duration={pitchDetails.pitch_type.duration} pitchId={id} />
         
       </motion.div>
     </div>
