@@ -44,7 +44,8 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
   const [recordingState, setRecordingState] = useState<State>(State.Ready);
   const videoRef = useRef<HTMLVideoElement>(null);
   const recorderRef = useRef<MediaRecorder>(null);
-  const chunks = useRef<Blob[]>([]);
+  const videoChunks = useRef<Blob[]>([]);
+  const audioChunks = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream>(null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(3);
@@ -58,6 +59,7 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
   const currentChunkIndex = useRef<number>(0);
   const pendingFacialData = useRef<any[]>([]);
   const form = new FormData();
+  const audioRecorderRef = useRef<MediaRecorder | null>(null)
 
 
 
@@ -169,6 +171,7 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
             video: { frameRate: options.frameRate },
           });
 
+          
           streamRef.current = mediaStream;
           setHasConsent(true);
 
@@ -211,22 +214,37 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
     eyeContactSum.current = 0;
 
 
-    const recorder = new MediaRecorder(streamRef.current!, {
+    const videoRecorder = new MediaRecorder(streamRef.current!, {
       mimeType: options.mimeType,
       audioBitsPerSecond: options.audioBitsPerSecond,
       videoBitsPerSecond: options.videoBitsPerSecond
-    })
+    });
 
+    const audioStream = new MediaStream();
+    audioStream.addTrack(streamRef.current!.getAudioTracks()[0]);
+
+    const audioRecorder = new MediaRecorder(audioStream, {
+      mimeType: 'audio/webm;codecs=opus',
+    });
+    audioRecorderRef.current = audioRecorder
+
+    
+
+
+
+    
+    recorderRef.current = videoRecorder;
+    videoChunks.current = [];
+    audioChunks.current = [];
 
     startDetectionLoop()
-    recorderRef.current = recorder;
-    chunks.current = [];
 
-    recorder.ondataavailable = async (e) => {
+    videoRecorder.ondataavailable = async (e) => {
+      console.log("RECORDED MIME TYPE:", e.data.type);
       if (e.data.size > 0) {
-        chunks.current.push(e.data)
+        audioChunks.current.push(e.data)
 
-        const arrayBuffer =await  e.data.arrayBuffer();
+        const arrayBuffer =await e.data.arrayBuffer();
 
         const eyeContactPct = eyeContactSamples.current > 0 
         ? eyeContactSum.current / eyeContactSamples.current
@@ -256,10 +274,10 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
       }
     };
 
-    recorder.onstop = handleStop
-    recorder.onpause = handlePause
-
-    recorder.start(1000);
+    videoRecorder.onstop = handleStop
+    videoRecorder.onpause = handlePause
+    audioRecorder.start(1000)
+    videoRecorder.start(1000);
 
     setRecordingState(State.Recording);
     console.log("mediaRecorder Started");
@@ -275,7 +293,7 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
     }
     detectionRunningRef.current = false
     streamRef.current?.getTracks().forEach(track => track.stop())
-    const blob = new Blob(chunks.current, { type: options.mimeType });
+    const blob = new Blob(videoChunks.current, { type: options.mimeType });
     const url = URL.createObjectURL(blob);
     setMediaUrl(url);
     setRecordingState(State.Stopped);
@@ -297,7 +315,7 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
   }
 
   const deleteMedia = () => {
-    chunks.current = [];
+    videoChunks.current = [];
     videoRef.current = null;
 
     recorderRef.current?.stop()
