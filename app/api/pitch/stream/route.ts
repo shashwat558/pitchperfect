@@ -105,7 +105,7 @@ export async function POST(req:NextRequest){
 
   if(!error){
     const transcript = result.results.channels[0].alternatives[0].transcript;
-    
+    console.log(transcript)
     if(!systemPrompt?.pitch_type?.system_prompt) {
       return NextResponse.json({error: "System prompt not found"}, {status: 400});
     }
