@@ -224,25 +224,29 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
     audioStream.addTrack(streamRef.current!.getAudioTracks()[0]);
 
     const audioRecorder = new MediaRecorder(audioStream, {
-      mimeType: 'audio/webm;codecs=opus',
+      mimeType: 'audio/webm;codec=opus',
+      audioBitsPerSecond: 64000
     });
-    audioRecorderRef.current = audioRecorder
-
-    
-
-
-
+    audioRecorderRef.current = audioRecorder 
     
     recorderRef.current = videoRecorder;
     videoChunks.current = [];
     audioChunks.current = [];
 
-    startDetectionLoop()
+    startDetectionLoop();
 
-    videoRecorder.ondataavailable = async (e) => {
+    videoRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) {
+      videoChunks.current.push(e.data);
+    }
+  };
+
+    audioRecorder.ondataavailable = async (e) => {
+       if (!detectionRunningRef.current) return; 
       console.log("RECORDED MIME TYPE:", e.data.type);
       if (e.data.size > 0) {
-        audioChunks.current.push(e.data)
+        audioChunks.current.push(e.data)     
+         
 
         const arrayBuffer =await e.data.arrayBuffer();
 
@@ -276,13 +280,11 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
 
     videoRecorder.onstop = handleStop
     videoRecorder.onpause = handlePause
-    audioRecorder.start(1000)
-    videoRecorder.start(1000);
+    audioRecorder.start(2000)
+    videoRecorder.start(2000);
 
     setRecordingState(State.Recording);
     console.log("mediaRecorder Started");
-
-
 
   }
 
@@ -292,7 +294,8 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
       recorderRef.current?.stop();
     }
     detectionRunningRef.current = false
-    streamRef.current?.getTracks().forEach(track => track.stop())
+    audioRecorderRef.current?.stop();
+    streamRef.current?.getTracks().forEach(track => track.stop());
     const blob = new Blob(videoChunks.current, { type: options.mimeType });
     const url = URL.createObjectURL(blob);
     setMediaUrl(url);
@@ -302,11 +305,13 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
   const handlePause = () => {
     if (recordingState === State.Recording) {
       recorderRef.current?.pause();
+      audioRecorderRef.current?.pause();
       detectionRunningRef.current = false
       setRecordingState(State.pause);
     }
     if (recordingState === State.pause) {
       recorderRef.current?.resume();
+      audioRecorderRef.current?.resume();
       detectionRunningRef.current = true
       setRecordingState(State.Recording)
     }
@@ -317,6 +322,8 @@ export function Recorder({ duration, pitchId }: { duration: number, pitchId:stri
   const deleteMedia = () => {
     videoChunks.current = [];
     videoRef.current = null;
+    audioChunks.current = [];
+    audioRecorderRef.current = null;
 
     recorderRef.current?.stop()
     setMediaUrl(null);

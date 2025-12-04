@@ -23,7 +23,7 @@ const evaluationFunction = async ({systemPrompt, facials:{eyeContact, smileInten
 }) => {
 
   const {object} = await generateObject({
-    model: openRouter("x-ai/grok-4.1-fast:free"),
+    model: openRouter("google/gemini-2.0-flash-exp:free"),
     schema: z.object({
       feedback: z.object({
         score: z.number(),
